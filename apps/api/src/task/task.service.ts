@@ -5,6 +5,8 @@ import { Task } from './entities/task.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../product/entities/product.entity';
+import { TaskNotFoundException } from '../exceptions/task-notFound-exception';
+import { ProductNotFoundException } from '../exceptions/product-notFound-exception';
 
 @Injectable()
 export class TaskService {
@@ -14,23 +16,71 @@ export class TaskService {
   ) {}
 
   async create(createTaskDto: CreateTaskDto) {
-    // @fixme createTaskDto.productId is not being saved to the task
-    return this._repository.save(createTaskDto);
+    // Fixed by fetching product by product id and supplying product entity with task entity
+    let product: Product | undefined;
+
+    if (createTaskDto.productId) {
+      product = await this.getProductById(createTaskDto.productId);
+    }
+
+    const task: Task = this._repository.create({
+      ...createTaskDto,
+      product,
+    });
+
+    return this._repository.save(task);
   }
 
   findAll() {
     return this._repository.find();
   }
 
-  findOne(id: string) {
-    return this._repository.findOneBy({ id });
+  async findOne(id: string) {
+    const task = await this._repository.findOneBy({ id });
+
+    if (!task) {
+      throw new TaskNotFoundException(id);
+    }
+
+    return task
   }
 
   async update(id: string, updateTaskDto: UpdateTaskDto) {
-    return this._repository.save({ ...updateTaskDto, id });
+    let product: Product | undefined;
+
+    if (updateTaskDto.productId) {
+      product = await this.getProductById(updateTaskDto.productId);
+    }
+
+    const task: Task = this._repository.create({
+      id,
+      ...updateTaskDto,
+      product,
+    });
+
+    return this._repository.save(task);
   }
 
-  remove(id: string) {
-    return this._repository.delete({ id });
+  async remove(id: string) {
+    const deleteResult = await this._repository.delete({ id });
+    if(deleteResult.affected === 0) {
+      throw new TaskNotFoundException(id);
+    }
+
+    return {
+      deleted: true
+    }
+  }
+
+  async getProductById(productId: string) : Promise<Product> {
+    const product = await this._productRepository.findOneBy({
+      id: productId,
+    });
+
+    if (!product) {
+      throw new ProductNotFoundException(productId);
+    }
+
+    return product;
   }
 }

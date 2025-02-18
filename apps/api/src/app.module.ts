@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmAsyncConfig } from './config/typeorm.config';
 import { ProductModule } from './product/product.module';
 import { TaskModule } from './task/task.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ClassSerializerInterceptor } from '@nestjs/common/serializer';
 
 @Module({
   imports: [
@@ -13,6 +15,10 @@ import { TaskModule } from './task/task.module';
     TaskModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor,
+    },],
 })
 export class AppModule {}

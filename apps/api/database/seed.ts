@@ -1,3 +1,4 @@
+import { ProductProperty } from '../src/product/entities/product-property.entity';
 import { DataSource } from 'typeorm';
 import { Product } from '../src/product/entities/product.entity';
 import { Task } from '../src/task/entities/task.entity';
@@ -26,7 +27,9 @@ const seed = async () => {
     for (let i = 0; i < 100; i++) {
       const product = new Product();
       product.name = `Product ${i}`;
-      product.properties = { description: `This is Product ${i}` };
+      const productProperty = new ProductProperty();
+      productProperty.properties = { description: `This is Product ${i}` };
+      product.productProperties =  productProperty;
 
       products.push(product);
     }

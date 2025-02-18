@@ -1,0 +1,25 @@
+<div *ngIf="isOpen" class="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
+      <div class="p-6">
+        <h2 class="text-lg font-medium mb-4">{{ operation === 'edit' ? 'Edit Task' : (operation === 'view' ? 'View Task' : 'Create Task') }}</h2>
+        <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="space-y-4">
+          <div>
+            <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+            <input type="text" id="title" formControlName="title" class="mt-1 block border border-grey w-full rounded-md">
+          </div>
+          <div>
+            <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+            <textarea id="description" formControlName="description" class="mt-1 block border border-grey w-full rounded-md"></textarea>
+          </div>
+          <div>
+            <label for="dueAt" class="block text-sm font-medium text-gray-700">Due Date</label>
+            <input type="date" id="dueAt" formControlName="dueAt" class="mt-1 block border border-grey w-full rounded-md">
+          </div>
+          <div class="flex justify-end space-x-2">
+            <button type="button" (click)="onClose()" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md">Cancel</button>
+            <button [disabled]="taskForm.invalid" type="submit" class="px-4 py-2 bg-gradient-to-r from-slate-900 to-slate-500 text-white text-base font-medium rounded-md mr-2">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>

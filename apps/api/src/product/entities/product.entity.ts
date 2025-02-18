@@ -1,5 +1,7 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Task } from "../../task/entities/task.entity";
+import { ProductProperty } from "./product-property.entity";
+import { Expose, Transform } from 'class-transformer';
 
 @Entity('products')
 export class Product {
@@ -9,9 +11,13 @@ export class Product {
   @Column({ length: 255 })
   name: string;
 
-  // @todo normalise properties out into their own relational table, the /products api should return in the same format
-  @Column({ type: 'jsonb', nullable: true })
-  properties?: Record<string, any>;
+  @OneToOne(() => ProductProperty, (property) => property.product, {
+    cascade: true,
+    eager: true
+  })
+  @Expose({ name: 'properties' })
+  @Transform(({ value }) => (value ? value.properties : {}))
+  productProperties: ProductProperty;
 
   @CreateDateColumn({ update: false, nullable: false })
   createdAt: Date;
@@ -19,6 +25,8 @@ export class Product {
   @UpdateDateColumn({ nullable: true })
   updatedAt?: Date;
 
-  @OneToMany(() => Task, (task) => task.product)
+  @OneToMany(() => Task, (task) => task.product, {
+    eager: true
+  })
   tasks: Task[];
 }
