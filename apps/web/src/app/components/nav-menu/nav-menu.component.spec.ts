@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { NavMenuComponent } from './nav-menu.component';
+import { provideRouter } from '@angular/router';
+import { provideLocationMocks } from '@angular/common/testing';
 
 describe('NavMenuComponent', () => {
   let component: NavMenuComponent;
@@ -8,7 +10,11 @@ describe('NavMenuComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NavMenuComponent]
+      imports: [NavMenuComponent],
+      providers: [
+        provideRouter([]),
+        provideLocationMocks(),
+      ]
     })
     .compileComponents();
 

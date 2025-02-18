@@ -5,41 +5,69 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { Task } from '../task/entities/task.entity';
+import { ProductNotFoundException } from '../exceptions/product-notFound-exception';
+import { ProductProperty } from './entities/product-property.entity';
 
 type ProductWithTasks = Product & { tasks?: Task[] };
 
 @Injectable()
 export class ProductService {
   constructor(
-    @InjectRepository(Product) private _repository: Repository<Product>,
-    @InjectRepository(Task) private _taskRepository: Repository<Task>,
+    @InjectRepository(Product) private _repository: Repository<Product>
   ) {}
 
   create(createProductDto: CreateProductDto) {
-    return this._repository.save(createProductDto);
+
+    const product: Product = this._repository.create({
+      name: createProductDto.name,
+      productProperties: this.getProductProprty(createProductDto.properties)
+    });
+
+    return this._repository.save(product);
   }
 
   async findAll() {
     const products: ProductWithTasks[] = await this._repository.find();
-
-    for (const product of products) {
-      product.tasks = await this._taskRepository.find({
-        where: { product: { id: product.id } },
-      });
-    }
-
     return products;
   }
 
-  findOne(id: string) {
-    return this._repository.findOneBy({ id });
+  async findOne(id: string) {
+    const product = await this._repository.findOneBy({ id });
+
+    if (!product) {
+      throw new ProductNotFoundException(id);
+    }
+
+    return product;
   }
 
   update(id: string, updateProductDto: UpdateProductDto) {
-    return this._repository.save({ ...updateProductDto, id });
+    const product: Product = this._repository.create({
+      id,
+      name: updateProductDto.name,
+      productProperties: this.getProductProprty(updateProductDto.properties)
+    });
+
+    return this._repository.save(product);
   }
 
-  remove(id: string) {
-    return this._repository.delete({ id });
+  async remove(id: string) {
+    const deleteResult = await this._repository.delete({ id });
+    if(deleteResult.affected === 0) {
+      throw new ProductNotFoundException(id);
+    }
+
+    return {
+      deleted: true
+    }
+  }
+
+  getProductProprty(properties: Record<string, any>): ProductProperty {
+    let productProperty: ProductProperty = new ProductProperty();
+
+    if (properties) {
+      productProperty.properties = properties;
+    }
+    return productProperty;
   }
 }

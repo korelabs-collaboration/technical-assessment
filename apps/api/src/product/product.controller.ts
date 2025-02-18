@@ -14,7 +14,8 @@ export class ProductController {
 
   @Get()
   findAll() {
-    // @fixme improve this slow api request
+    // Fixed performance by eager loading tasks in Product entity
+    // and indexing foreign key product id in tasks
     return this.productService.findAll();
   }
 

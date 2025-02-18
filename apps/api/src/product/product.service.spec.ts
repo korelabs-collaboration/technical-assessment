@@ -10,6 +10,13 @@ describe('ProductService', () => {
   let service: ProductService;
   let repository: Repository<Product>;
 
+  const product = {
+    id: 'product-id',
+    name: 'product-name',
+    createdAt: new Date(),
+    tasks: [],
+  };
+
   beforeEach(async () => {
     const repositoryToken = getRepositoryToken(Product);
     const module: TestingModule = await Test.createTestingModule({
@@ -23,6 +30,7 @@ describe('ProductService', () => {
             findOneBy: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
+            create: jest.fn(),
           },
         },
       ],
@@ -39,10 +47,11 @@ describe('ProductService', () => {
   describe('create', () => {
     it('should call repository.save with the createProductDto', () => {
       const createProductDto: CreateProductDto = {
-        name: 'test product',
+        name: 'product-name',
       };
+      jest.spyOn(repository, 'create').mockReturnValue(product as Product);
       service.create(createProductDto);
-      expect(repository.save).toHaveBeenCalledWith(createProductDto);
+      expect(repository.save).toHaveBeenCalledWith(product);
     });
   });
 
@@ -56,6 +65,9 @@ describe('ProductService', () => {
   describe('findOne', () => {
     it('should call repository.findOneBy with the id', () => {
       const id = '123';
+      jest
+        .spyOn(repository, 'findOneBy')
+        .mockResolvedValue(product as Product);
       service.findOne(id);
       expect(repository.findOneBy).toHaveBeenCalledWith({ id });
     });
@@ -63,19 +75,24 @@ describe('ProductService', () => {
 
   describe('update', () => {
     it('should call repository.save with the updated product', () => {
-      const id = '123';
       const updateProductDto: UpdateProductDto = {
         name: 'test product - updated'
       };
-      service.update(id, updateProductDto);
-      expect(repository.save).toHaveBeenCalledWith({ ...updateProductDto, id });
+      jest.spyOn(repository, 'create').mockReturnValue(product as Product);
+      service.update(product.id, updateProductDto);
+      expect(repository.save).toHaveBeenCalledWith(product);
     });
   });
 
   describe('remove', () => {
-    it('should call repository.delete with the id', () => {
+    it('should call repository.delete with the id', async () => {
       const id = '123';
-      service.remove(id);
+      const deletedresult = {
+        affected: 1,
+        raw: []
+      }
+      jest.spyOn(repository, 'delete').mockResolvedValue(deletedresult);
+      await service.remove(id);
       expect(repository.delete).toHaveBeenCalledWith({ id });
     });
   });
