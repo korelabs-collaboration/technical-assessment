@@ -14,7 +14,6 @@ export class TaskService {
   ) {}
 
   async create(createTaskDto: CreateTaskDto) {
-    // @fixme createTaskDto.productId is not being saved to the task
     return this._repository.save(createTaskDto);
   }
 

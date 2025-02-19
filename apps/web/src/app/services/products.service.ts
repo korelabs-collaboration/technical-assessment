@@ -3,13 +3,23 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 
-export type Product = {
+export interface Task {
+  id: string;
+  title: string;
+  description: string;
+  dueAt: string;
+  productId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Product {
   id: string;
   name: string;
   updatedAt: string;
   properties: Record<string, any>;
-  tasks: { title: string; description: string; dueAt: string }[];
-};
+  tasks: Task[];
+}
 
 @Injectable({
   providedIn: 'root',
