@@ -22,7 +22,11 @@
     "typeorm:entity": "npx typeorm-ts-node-commonjs --dataSource src/config/ormconfig.entities.ts",
     "typeorm:generate:entity": "pnpm run typeorm:entity migration:generate ./database/migrations/migration --timestamp",
     "typeorm:migrate": "pnpm run typeorm:entity migration:run",
-    "db:seed": "ts-node ./database/seed.ts"
+    "db:seed": "ts-node ./database/seed.ts",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:generate": "pnpm typeorm migration:generate -d src/config/typeorm.config-migrations.ts",
+    "migration:run": "pnpm typeorm migration:run -d src/config/typeorm.config-migrations.ts",
+    "migration:revert": "pnpm typeorm migration:revert -d src/config/typeorm.config-migrations.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

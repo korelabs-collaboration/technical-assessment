@@ -3,6 +3,8 @@ import { Product, ProductsService } from '../../services/products.service';
 import { Observable } from 'rxjs';
 import { AsyncPipe, DatePipe, NgFor } from '@angular/common';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '../shared/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-products',
@@ -17,6 +19,7 @@ export class ProductsComponent implements OnInit {
   constructor(
     private _service: ProductsService,
     private _router: Router,
+    private _dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -32,8 +35,20 @@ export class ProductsComponent implements OnInit {
   }
 
   async deleteProduct(id: string, event: Event) {
-    // @todo add custom confirmation dialog here - following a similar design
     event.stopPropagation();
-    this._service.delete(id).subscribe(() => this.loadProducts())
+    
+    const dialogRef = this._dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Confirm Deletion',
+        message: 'Are you sure you want to delete this product? This action cannot be undone.'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this._service.delete(id).subscribe(() => this.loadProducts());
+      }
+    });
   }
 }

@@ -6,8 +6,6 @@ import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { Task } from '../task/entities/task.entity';
 
-type ProductWithTasks = Product & { tasks?: Task[] };
-
 @Injectable()
 export class ProductService {
   constructor(
@@ -15,28 +13,32 @@ export class ProductService {
     @InjectRepository(Task) private _taskRepository: Repository<Task>,
   ) {}
 
-  create(createProductDto: CreateProductDto) {
-    return this._repository.save(createProductDto);
+  async create(createProductDto: CreateProductDto) {
+    const product = this._repository.create(createProductDto);
+    return this._repository.save(product);
   }
 
   async findAll() {
-    const products: ProductWithTasks[] = await this._repository.find();
-
-    for (const product of products) {
-      product.tasks = await this._taskRepository.find({
-        where: { product: { id: product.id } },
-      });
-    }
-
-    return products;
+    return this._repository.find({
+      relations: ['tasks'],
+    });
   }
 
   findOne(id: string) {
-    return this._repository.findOneBy({ id });
+    return this._repository.findOne({
+      where: { id },
+      relations: ['tasks'],
+    });
   }
 
-  update(id: string, updateProductDto: UpdateProductDto) {
-    return this._repository.save({ ...updateProductDto, id });
+  async update(id: string, updateProductDto: UpdateProductDto) {
+    const product = await this._repository.findOne({ where: { id } });
+    if (!product) {
+      throw new Error('Product not found');
+    }
+
+    Object.assign(product, updateProductDto);
+    return this._repository.save(product);
   }
 
   remove(id: string) {

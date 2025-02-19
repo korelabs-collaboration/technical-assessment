@@ -14,7 +14,6 @@ export class ProductController {
 
   @Get()
   findAll() {
-    // @fixme improve this slow api request
     return this.productService.findAll();
   }
 
